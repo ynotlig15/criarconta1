@@ -26,7 +26,6 @@
             max-width: 700px;
             width: 100%;
             padding: 25px 30px;
-            transition: all 0.3s;
         }
         h1 {
             font-size: 1.7rem;
@@ -57,7 +56,6 @@
             border: 1px solid #cbd5e0;
             border-radius: 12px;
             margin-bottom: 15px;
-            transition: 0.2s;
         }
         input:focus {
             outline: none;
@@ -140,7 +138,6 @@
             margin-top: 20px;
             color: #7e8c94;
         }
-        /* Histórico */
         .historico-area {
             margin-top: 25px;
             border-top: 2px dashed #cbd5e0;
@@ -220,7 +217,6 @@
         .acoes-col {
             text-align: center;
         }
-        /* Feedback de cópia */
         .copiado-msg {
             background: #28a745;
             color: white;
@@ -245,12 +241,11 @@
         <div class="char-count" id="loginCounter">0 / 12</div>
     </div>
 
-    <!-- Opção de senha -->
     <div class="field-group">
         <label>🔑 Tipo de senha</label>
         <div class="radio-group">
-            <label><input type="radio" name="senhaTipo" value="igual" checked> Igual ao login</label>
-            <label><input type="radio" name="senhaTipo" value="aleatoria"> Aleatória (8 caracteres, minúscula)</label>
+            <label><input type="radio" name="senhaTipo" value="aleatoria" checked> Aleatória (8 caracteres, minúscula, 3 letras + 5 números)</label>
+            <label><input type="radio" name="senhaTipo" value="igual"> Igual ao login</label>
         </div>
     </div>
 
@@ -269,7 +264,6 @@
         <button id="copyBtn" class="copy-btn">📋 Copiar código</button>
     </div>
 
-    <!-- Histórico -->
     <div class="historico-area">
         <button class="historico-toggle" id="historicoToggle">📜 Histórico de cadastros gerados</button>
         <div class="historico-lista" id="historicoLista">
@@ -303,11 +297,12 @@
         const historicoLista = document.getElementById('historicoLista');
         const historicoCorpo = document.getElementById('historicoCorpo');
         const limparHistorico = document.getElementById('limparHistorico');
+        const radioAleatoria = document.querySelector('input[name="senhaTipo"][value="aleatoria"]');
+        const radioIgual = document.querySelector('input[name="senhaTipo"][value="igual"]');
 
-        // Estado do histórico
+        // Histórico
         let historico = [];
 
-        // Carregar histórico do localStorage
         function carregarHistorico() {
             try {
                 const data = localStorage.getItem('z8_historico');
@@ -319,13 +314,11 @@
             renderizarHistorico();
         }
 
-        // Salvar histórico no localStorage
         function salvarHistorico() {
             localStorage.setItem('z8_historico', JSON.stringify(historico));
             renderizarHistorico();
         }
 
-        // Adicionar um registro
         function adicionarRegistro(login, senha, nickname) {
             const agora = new Date();
             const dataStr = agora.toLocaleString('pt-BR');
@@ -336,12 +329,10 @@
                 data: dataStr,
                 timestamp: agora.getTime()
             });
-            // Manter só os últimos 100 registros
             if (historico.length > 100) historico.shift();
             salvarHistorico();
         }
 
-        // Renderizar tabela
         function renderizarHistorico() {
             const tbody = historicoCorpo;
             if (historico.length === 0) {
@@ -349,7 +340,6 @@
                 return;
             }
             let html = '';
-            // Mostrar mais recentes primeiro
             const reversed = [...historico].reverse();
             for (let i = 0; i < reversed.length; i++) {
                 const item = reversed[i];
@@ -359,13 +349,12 @@
                     <td>${escapeHtml(item.nickname)}</td>
                     <td>${escapeHtml(item.data)}</td>
                     <td class="acoes-col">
-                        <button class="btn-copiar-login" data-index="${i}" data-login="${escapeHtml(item.login)}" data-senha="${escapeHtml(item.senha)}">📋 Copiar login:senha</button>
+                        <button class="btn-copiar-login" data-login="${escapeHtml(item.login)}" data-senha="${escapeHtml(item.senha)}">📋 Copiar login:senha</button>
                     </td>
                 </tr>`;
             }
             tbody.innerHTML = html;
 
-            // Adicionar eventos de cópia para cada botão
             document.querySelectorAll('.btn-copiar-login').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -373,7 +362,6 @@
                     const senha = this.getAttribute('data-senha');
                     const texto = login + ':' + senha;
                     navigator.clipboard.writeText(texto).then(() => {
-                        // Feedback visual rápido
                         const original = this.textContent;
                         this.textContent = '✅ Copiado!';
                         setTimeout(() => {
@@ -390,7 +378,7 @@
             return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         }
 
-        // Atualiza contador
+        // Contador login
         loginInput.addEventListener('input', function() {
             let val = this.value;
             if (val.length > 12) {
@@ -400,7 +388,7 @@
             loginCounter.textContent = `${val.length} / 12`;
         });
 
-        // Função para alterar última letra
+        // Alterar última letra
         function alterarUltimaLetra(str) {
             if (str.length === 0) return str;
             let lastChar = str[str.length - 1];
@@ -425,17 +413,25 @@
             return str.slice(0, -1) + nextChar;
         }
 
-        // Gerar senha aleatória com 8 caracteres, apenas minúsculas e números
+        // Gerar senha aleatória: 8 caracteres, minúscula, com exatamente 3 letras e 5 números
         function gerarSenhaAleatoria() {
-            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            const letras = 'abcdefghijklmnopqrstuvwxyz';
+            const numeros = '0123456789';
+            // Escolher 3 letras aleatórias
             let senha = '';
-            for (let i = 0; i < 8; i++) {
-                senha += chars.charAt(Math.floor(Math.random() * chars.length));
+            for (let i = 0; i < 3; i++) {
+                senha += letras.charAt(Math.floor(Math.random() * letras.length));
             }
+            // Escolher 5 números
+            for (let i = 0; i < 5; i++) {
+                senha += numeros.charAt(Math.floor(Math.random() * numeros.length));
+            }
+            // Embaralhar
+            senha = senha.split('').sort(() => Math.random() - 0.5).join('');
             return senha;
         }
 
-        // Escapar para JavaScript
+        // Escapar para JS
         function escapeJS(str) {
             return str.replace(/\\/g, '\\\\')
                       .replace(/'/g, "\\'")
@@ -443,6 +439,32 @@
                       .replace(/\n/g, '\\n')
                       .replace(/\r/g, '\\r');
         }
+
+        // Salvar preferência do radio
+        function salvarPreferenciaRadio(valor) {
+            localStorage.setItem('z8_tipo_senha', valor);
+        }
+
+        function carregarPreferenciaRadio() {
+            const valor = localStorage.getItem('z8_tipo_senha');
+            if (valor === 'igual') {
+                radioIgual.checked = true;
+                radioAleatoria.checked = false;
+            } else {
+                // padrão: aleatória
+                radioAleatoria.checked = true;
+                radioIgual.checked = false;
+                if (!valor) salvarPreferenciaRadio('aleatoria');
+            }
+        }
+
+        // Ouvintes para salvar preferência
+        radioAleatoria.addEventListener('change', function() {
+            if (this.checked) salvarPreferenciaRadio('aleatoria');
+        });
+        radioIgual.addEventListener('change', function() {
+            if (this.checked) salvarPreferenciaRadio('igual');
+        });
 
         // Gerar script
         generateBtn.addEventListener('click', function() {
@@ -456,24 +478,20 @@
                 loginInput.value = login;
             }
 
-            // Determinar senha
-            const senhaTipo = document.querySelector('input[name="senhaTipo"]:checked').value;
+            const tipo = document.querySelector('input[name="senhaTipo"]:checked').value;
             let senha;
-            if (senhaTipo === 'aleatoria') {
+            if (tipo === 'aleatoria') {
                 senha = gerarSenhaAleatoria();
             } else {
-                // senha igual ao login, mas forçar minúscula
-                senha = login.toLowerCase();
+                senha = login.toLowerCase(); // igual ao login, mas minúscula
             }
 
             let nickname = alterarUltimaLetra(login);
             if (nickname.length > 13) nickname = nickname.slice(0,13);
             const secretAnswer = login;
 
-            // Adicionar ao histórico
             adicionarRegistro(login, senha, nickname);
 
-            // Construir script
             const script = `
 (function() {
     var login = "${escapeJS(login)}";
@@ -506,7 +524,6 @@
             outputArea.style.display = 'block';
         });
 
-        // Copiar código do script
         copyBtn.addEventListener('click', function() {
             const text = codeOutput.textContent;
             navigator.clipboard.writeText(text).then(() => {
@@ -516,7 +533,6 @@
             });
         });
 
-        // Toggle histórico
         historicoToggle.addEventListener('click', function() {
             historicoLista.classList.toggle('aberto');
             if (historicoLista.classList.contains('aberto')) {
@@ -526,7 +542,6 @@
             }
         });
 
-        // Limpar histórico
         limparHistorico.addEventListener('click', function() {
             if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
                 historico = [];
@@ -536,6 +551,7 @@
         });
 
         // Inicializar
+        carregarPreferenciaRadio();
         carregarHistorico();
     })();
 </script>
