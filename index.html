@@ -23,7 +23,7 @@
             background: #f5f7fa;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            max-width: 750px;
+            max-width: 700px;
             width: 100%;
             padding: 25px 30px;
             transition: all 0.3s;
@@ -185,22 +185,19 @@
         th {
             background: #e9ecef;
             color: #1e3c4c;
-            position: sticky;
-            top: 0;
         }
-        .btn-copiar-historico {
+        .btn-copiar-login {
             background: #2c5a6e;
             color: white;
             border: none;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 30px;
             cursor: pointer;
-            font-size: 0.75rem;
-            transition: 0.2s;
+            font-size: 0.7rem;
+            white-space: nowrap;
         }
-        .btn-copiar-historico:hover {
+        .btn-copiar-login:hover {
             background: #1e3c4c;
-            transform: scale(0.95);
         }
         .btn-limpar {
             background: #b02a37;
@@ -220,10 +217,18 @@
             color: #7e8c94;
             padding: 15px;
         }
-        .acoes {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        .acoes-col {
+            text-align: center;
+        }
+        /* Feedback de cópia */
+        .copiado-msg {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            display: inline-block;
+            margin-left: 5px;
         }
     </style>
 </head>
@@ -240,17 +245,18 @@
         <div class="char-count" id="loginCounter">0 / 12</div>
     </div>
 
+    <!-- Opção de senha -->
     <div class="field-group">
         <label>🔑 Tipo de senha</label>
         <div class="radio-group">
             <label><input type="radio" name="senhaTipo" value="igual" checked> Igual ao login</label>
-            <label><input type="radio" name="senhaTipo" value="aleatoria"> Aleatória (4 minúsculas/números)</label>
+            <label><input type="radio" name="senhaTipo" value="aleatoria"> Aleatória (8 caracteres, minúscula)</label>
         </div>
     </div>
 
-    <div class="info" style="background: #fff0e6;">
+    <div class="info" style="background: #fff0e6; --darkreader-inline-bgimage: initial; --darkreader-inline-bgcolor: #fff0e6;" data-darkreader-inline-bgimage="" data-darkreader-inline-bgcolor="">
         📝 Regras automáticas:<br>
-        • Senha = conforme escolha acima<br>
+        • Senha = conforme escolha acima (sempre minúscula)<br>
         • Nome do Fórum = <strong>Login com a última letra alterada para o próximo caractere</strong> (ex: Login "Joao" → "Joap")<br>
         • Resposta secreta = <strong>mesmo valor do Login</strong><br>
         • Pergunta secreta = "Qual era o nome de sua primeira escola?"
@@ -263,14 +269,16 @@
         <button id="copyBtn" class="copy-btn">📋 Copiar código</button>
     </div>
 
+    <!-- Histórico -->
     <div class="historico-area">
         <button class="historico-toggle" id="historicoToggle">📜 Histórico de cadastros gerados</button>
         <div class="historico-lista" id="historicoLista">
             <table id="historicoTabela">
                 <thead>
-                    <tr><th>Login</th><th>Senha</th><th>Nickname</th><th>Data/Hora</th><th>Ação</th></tr>
+                    <tr><th>Login</th><th>Senha</th><th>Nickname</th><th>Data/Hora</th><th>Ações</th></tr>
                 </thead>
                 <tbody id="historicoCorpo">
+                    <!-- preenchido via JS -->
                 </tbody>
             </table>
             <button class="btn-limpar" id="limparHistorico">🗑️ Limpar histórico</button>
@@ -296,23 +304,28 @@
         const historicoCorpo = document.getElementById('historicoCorpo');
         const limparHistorico = document.getElementById('limparHistorico');
 
+        // Estado do histórico
         let historico = [];
 
+        // Carregar histórico do localStorage
         function carregarHistorico() {
             try {
                 const data = localStorage.getItem('z8_historico');
-                historico = data ? JSON.parse(data) : [];
+                if (data) historico = JSON.parse(data);
+                else historico = [];
             } catch (e) {
                 historico = [];
             }
             renderizarHistorico();
         }
 
+        // Salvar histórico no localStorage
         function salvarHistorico() {
             localStorage.setItem('z8_historico', JSON.stringify(historico));
             renderizarHistorico();
         }
 
+        // Adicionar um registro
         function adicionarRegistro(login, senha, nickname) {
             const agora = new Date();
             const dataStr = agora.toLocaleString('pt-BR');
@@ -323,10 +336,12 @@
                 data: dataStr,
                 timestamp: agora.getTime()
             });
+            // Manter só os últimos 100 registros
             if (historico.length > 100) historico.shift();
             salvarHistorico();
         }
 
+        // Renderizar tabela
         function renderizarHistorico() {
             const tbody = historicoCorpo;
             if (historico.length === 0) {
@@ -334,33 +349,39 @@
                 return;
             }
             let html = '';
+            // Mostrar mais recentes primeiro
             const reversed = [...historico].reverse();
             for (let i = 0; i < reversed.length; i++) {
                 const item = reversed[i];
-                const index = i; // para identificar no clique
                 html += `<tr>
                     <td>${escapeHtml(item.login)}</td>
                     <td>${escapeHtml(item.senha)}</td>
                     <td>${escapeHtml(item.nickname)}</td>
                     <td>${escapeHtml(item.data)}</td>
-                    <td><button class="btn-copiar-historico" data-index="${index}">📋 Copiar login:senha</button></td>
+                    <td class="acoes-col">
+                        <button class="btn-copiar-login" data-index="${i}" data-login="${escapeHtml(item.login)}" data-senha="${escapeHtml(item.senha)}">📋 Copiar login:senha</button>
+                    </td>
                 </tr>`;
             }
             tbody.innerHTML = html;
 
-            // Adicionar eventos para os botões de copiar
-            document.querySelectorAll('.btn-copiar-historico').forEach(btn => {
+            // Adicionar eventos de cópia para cada botão
+            document.querySelectorAll('.btn-copiar-login').forEach(btn => {
                 btn.addEventListener('click', function(e) {
-                    const idx = this.dataset.index;
-                    const item = reversed[idx];
-                    if (item) {
-                        const texto = `${item.login}:${item.senha}`;
-                        navigator.clipboard.writeText(texto).then(() => {
-                            alert('✅ Login e senha copiados: ' + texto);
-                        }).catch(() => {
-                            alert('Não foi possível copiar, selecione manualmente.');
-                        });
-                    }
+                    e.stopPropagation();
+                    const login = this.getAttribute('data-login');
+                    const senha = this.getAttribute('data-senha');
+                    const texto = login + ':' + senha;
+                    navigator.clipboard.writeText(texto).then(() => {
+                        // Feedback visual rápido
+                        const original = this.textContent;
+                        this.textContent = '✅ Copiado!';
+                        setTimeout(() => {
+                            this.textContent = original;
+                        }, 1500);
+                    }).catch(() => {
+                        alert('Não foi possível copiar. Selecione manualmente.');
+                    });
                 });
             });
         }
@@ -369,6 +390,7 @@
             return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         }
 
+        // Atualiza contador
         loginInput.addEventListener('input', function() {
             let val = this.value;
             if (val.length > 12) {
@@ -378,6 +400,7 @@
             loginCounter.textContent = `${val.length} / 12`;
         });
 
+        // Função para alterar última letra
         function alterarUltimaLetra(str) {
             if (str.length === 0) return str;
             let lastChar = str[str.length - 1];
@@ -402,16 +425,17 @@
             return str.slice(0, -1) + nextChar;
         }
 
-        // Gerar senha aleatória: 4 caracteres, apenas letras minúsculas e números
+        // Gerar senha aleatória com 8 caracteres, apenas minúsculas e números
         function gerarSenhaAleatoria() {
             const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
             let senha = '';
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 8; i++) {
                 senha += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             return senha;
         }
 
+        // Escapar para JavaScript
         function escapeJS(str) {
             return str.replace(/\\/g, '\\\\')
                       .replace(/'/g, "\\'")
@@ -420,6 +444,7 @@
                       .replace(/\r/g, '\\r');
         }
 
+        // Gerar script
         generateBtn.addEventListener('click', function() {
             let login = loginInput.value.trim();
             if (login === "") {
@@ -431,20 +456,24 @@
                 loginInput.value = login;
             }
 
+            // Determinar senha
             const senhaTipo = document.querySelector('input[name="senhaTipo"]:checked').value;
             let senha;
             if (senhaTipo === 'aleatoria') {
                 senha = gerarSenhaAleatoria();
             } else {
-                senha = login;
+                // senha igual ao login, mas forçar minúscula
+                senha = login.toLowerCase();
             }
 
             let nickname = alterarUltimaLetra(login);
             if (nickname.length > 13) nickname = nickname.slice(0,13);
             const secretAnswer = login;
 
+            // Adicionar ao histórico
             adicionarRegistro(login, senha, nickname);
 
+            // Construir script
             const script = `
 (function() {
     var login = "${escapeJS(login)}";
@@ -477,6 +506,7 @@
             outputArea.style.display = 'block';
         });
 
+        // Copiar código do script
         copyBtn.addEventListener('click', function() {
             const text = codeOutput.textContent;
             navigator.clipboard.writeText(text).then(() => {
@@ -486,6 +516,7 @@
             });
         });
 
+        // Toggle histórico
         historicoToggle.addEventListener('click', function() {
             historicoLista.classList.toggle('aberto');
             if (historicoLista.classList.contains('aberto')) {
@@ -495,6 +526,7 @@
             }
         });
 
+        // Limpar histórico
         limparHistorico.addEventListener('click', function() {
             if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
                 historico = [];
