@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Script para Cadastro Z8Games</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+        }
+        body {
+            background: #1a2a32;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            background: #f5f7fa;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-width: 650px;
+            width: 100%;
+            padding: 25px 30px;
+            transition: all 0.3s;
+        }
+        h1 {
+            font-size: 1.7rem;
+            color: #1e3c4c;
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-left: 5px solid #ff6d34;
+            padding-left: 15px;
+        }
+        .info {
+            background: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #2c5a6e;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: 600;
+            color: #1e3c4c;
+            display: block;
+            margin-bottom: 6px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #ff6d34;
+            box-shadow: 0 0 0 2px rgba(255,109,52,0.2);
+        }
+        .field-group {
+            margin-bottom: 10px;
+        }
+        .char-count {
+            font-size: 0.75rem;
+            text-align: right;
+            margin-top: -12px;
+            margin-bottom: 15px;
+            color: #5a6e7c;
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+        button {
+            background: #ff6d34;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 40px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 5px;
+        }
+        button:hover {
+            background: #e55a24;
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background: #2c5a6e;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+        .btn-secondary:hover {
+            background: #1e3c4c;
+        }
+        pre {
+            background: #1e2a36;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 14px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            margin: 20px 0 10px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .copy-btn {
+            background: #2c5a6e;
+            margin-top: 0;
+            font-size: 0.9rem;
+            padding: 8px;
+        }
+        .copy-btn:hover {
+            background: #1e3c4c;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 20px;
+            color: #7e8c94;
+        }
+        /* Histórico */
+        .historico-area {
+            margin-top: 25px;
+            border-top: 2px dashed #cbd5e0;
+            padding-top: 15px;
+        }
+        .historico-toggle {
+            background: none;
+            border: none;
+            color: #1e3c4c;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 5px 0;
+            width: auto;
+            background: transparent;
+        }
+        .historico-toggle:hover {
+            background: transparent;
+            transform: none;
+            color: #ff6d34;
+        }
+        .historico-lista {
+            display: none;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .historico-lista.aberto {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th, td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #e9ecef;
+            color: #1e3c4c;
+        }
+        .btn-limpar {
+            background: #b02a37;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+        .btn-limpar:hover {
+            background: #8f1f2a;
+        }
+        .vazio {
+            text-align: center;
+            color: #7e8c94;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🚀 Gerador de script automático</h1>
+    <div class="info">
+        ⚡ Preencha o Login desejado (máx. 12 caracteres). O script gerado fará o cadastro na página da Z8Games quando colado no console.
+    </div>
+
+    <div class="field-group">
+        <label>🔐 Login (ID da conta)</label>
+        <input type="text" id="loginInput" placeholder="Exemplo: MeuLogin12" maxlength="12" autocomplete="off">
+        <div class="char-count" id="loginCounter">0 / 12</div>
+    </div>
+
+    <!-- Opção de senha -->
+    <div class="field-group">
+        <label>🔑 Tipo de senha</label>
+        <div class="radio-group">
+            <label><input type="radio" name="senhaTipo" value="igual" checked> Igual ao login</label>
+            <label><input type="radio" name="senhaTipo" value="aleatoria"> Aleatória (8 caracteres)</label>
+        </div>
+    </div>
+
+    <div class="info" style="background: #fff0e6; --darkreader-inline-bgimage: initial; --darkreader-inline-bgcolor: #fff0e6;" data-darkreader-inline-bgimage="" data-darkreader-inline-bgcolor="">
+        📝 Regras automáticas:<br>
+        • Senha = conforme escolha acima<br>
+        • Nome do Fórum = <strong>Login com a última letra alterada para o próximo caractere</strong> (ex: Login "Joao" → "Joap")<br>
+        • Resposta secreta = <strong>mesmo valor do Login</strong><br>
+        • Pergunta secreta = "Qual era o nome de sua primeira escola?"
+    </div>
+
+    <button id="generateBtn">✨ Gerar código para o console</button>
+
+    <div id="outputArea" style="display: none;">
+        <pre id="codeOutput"></pre>
+        <button id="copyBtn" class="copy-btn">📋 Copiar código</button>
+    </div>
+
+    <!-- Histórico -->
+    <div class="historico-area">
+        <button class="historico-toggle" id="historicoToggle">📜 Histórico de cadastros gerados</button>
+        <div class="historico-lista" id="historicoLista">
+            <table id="historicoTabela">
+                <thead>
+                    <tr><th>Login</th><th>Senha</th><th>Nickname</th><th>Data/Hora</th></tr>
+                </thead>
+                <tbody id="historicoCorpo">
+                    <!-- preenchido via JS -->
+                </tbody>
+            </table>
+            <button class="btn-limpar" id="limparHistorico">🗑️ Limpar histórico</button>
+        </div>
+    </div>
+
+    <footer>
+        Cole o código no console (F12) da página https://br.z8games.com/signup.html e ele preencherá e enviará o formulário.
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // Elementos
+        const loginInput = document.getElementById('loginInput');
+        const loginCounter = document.getElementById('loginCounter');
+        const generateBtn = document.getElementById('generateBtn');
+        const outputArea = document.getElementById('outputArea');
+        const codeOutput = document.getElementById('codeOutput');
+        const copyBtn = document.getElementById('copyBtn');
+        const historicoToggle = document.getElementById('historicoToggle');
+        const historicoLista = document.getElementById('historicoLista');
+        const historicoCorpo = document.getElementById('historicoCorpo');
+        const limparHistorico = document.getElementById('limparHistorico');
+
+        // Estado do histórico
+        let historico = [];
+
+        // Carregar histórico do localStorage
+        function carregarHistorico() {
+            try {
+                const data = localStorage.getItem('z8_historico');
+                if (data) historico = JSON.parse(data);
+                else historico = [];
+            } catch (e) {
+                historico = [];
+            }
+            renderizarHistorico();
+        }
+
+        // Salvar histórico no localStorage
+        function salvarHistorico() {
+            localStorage.setItem('z8_historico', JSON.stringify(historico));
+            renderizarHistorico();
+        }
+
+        // Adicionar um registro
+        function adicionarRegistro(login, senha, nickname) {
+            const agora = new Date();
+            const dataStr = agora.toLocaleString('pt-BR');
+            historico.push({
+                login,
+                senha,
+                nickname,
+                data: dataStr,
+                timestamp: agora.getTime()
+            });
+            // Manter só os últimos 100 registros para não encher
+            if (historico.length > 100) historico.shift();
+            salvarHistorico();
+        }
+
+        // Renderizar tabela
+        function renderizarHistorico() {
+            const tbody = historicoCorpo;
+            if (historico.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="vazio">Nenhum cadastro gerado ainda.</td></tr>`;
+                return;
+            }
+            let html = '';
+            // Mostrar mais recentes primeiro
+            const reversed = [...historico].reverse();
+            for (const item of reversed) {
+                html += `<tr>
+                    <td>${escapeHtml(item.login)}</td>
+                    <td>${escapeHtml(item.senha)}</td>
+                    <td>${escapeHtml(item.nickname)}</td>
+                    <td>${escapeHtml(item.data)}</td>
+                </tr>`;
+            }
+            tbody.innerHTML = html;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        // Atualiza contador de caracteres
+        loginInput.addEventListener('input', function() {
+            let val = this.value;
+            if (val.length > 12) {
+                val = val.slice(0,12);
+                this.value = val;
+            }
+            loginCounter.textContent = `${val.length} / 12`;
+        });
+
+        // Função para alterar última letra
+        function alterarUltimaLetra(str) {
+            if (str.length === 0) return str;
+            let lastChar = str[str.length - 1];
+            let nextChar;
+            if (/[a-zA-Z]/.test(lastChar)) {
+                let code = lastChar.charCodeAt(0);
+                let isUpper = (code >= 65 && code <= 90);
+                let isLower = (code >= 97 && code <= 122);
+                if (isUpper) {
+                    nextChar = code === 90 ? 'A' : String.fromCharCode(code + 1);
+                } else if (isLower) {
+                    nextChar = code === 122 ? 'a' : String.fromCharCode(code + 1);
+                } else {
+                    nextChar = lastChar;
+                }
+            } else if (/[0-9]/.test(lastChar)) {
+                let num = parseInt(lastChar, 10);
+                nextChar = (num === 9) ? '0' : String(num + 1);
+            } else {
+                nextChar = lastChar;
+            }
+            return str.slice(0, -1) + nextChar;
+        }
+
+        // Gerar senha aleatória com 8 caracteres (letras maiúsc/minúsc, números, símbolos)
+        function gerarSenhaAleatoria() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*';
+            let senha = '';
+            for (let i = 0; i < 8; i++) {
+                senha += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return senha;
+        }
+
+        // Escapar para JavaScript
+        function escapeJS(str) {
+            return str.replace(/\\/g, '\\\\')
+                      .replace(/'/g, "\\'")
+                      .replace(/"/g, '\\"')
+                      .replace(/\n/g, '\\n')
+                      .replace(/\r/g, '\\r');
+        }
+
+        // Gerar script
+        generateBtn.addEventListener('click', function() {
+            let login = loginInput.value.trim();
+            if (login === "") {
+                alert("Digite um login primeiro!");
+                return;
+            }
+            if (login.length > 12) {
+                login = login.slice(0,12);
+                loginInput.value = login;
+            }
+
+            // Determinar senha
+            const senhaTipo = document.querySelector('input[name="senhaTipo"]:checked').value;
+            let senha;
+            if (senhaTipo === 'aleatoria') {
+                senha = gerarSenhaAleatoria();
+            } else {
+                senha = login;
+            }
+
+            let nickname = alterarUltimaLetra(login);
+            if (nickname.length > 13) nickname = nickname.slice(0,13);
+            const secretAnswer = login;
+
+            // Adicionar ao histórico
+            adicionarRegistro(login, senha, nickname);
+
+            // Construir script
+            const script = `
+(function() {
+    var login = "${escapeJS(login)}";
+    var senha = "${escapeJS(senha)}";
+    var nickname = "${escapeJS(nickname)}";
+    var respostaSecreta = "${escapeJS(secretAnswer)}";
+
+    $('#userid').val(login).trigger('input');
+    $('#password').val(senha).trigger('input');
+    $('#confirmpwd').val(senha).trigger('input');
+    $('#nickname').val(nickname).trigger('input');
+    $('#secretqansw').val(respostaSecreta).trigger('input');
+
+    $('#secretq').val('9').selectmenu('refresh');
+    $('#secretq-button .ui-selectmenu-text').text($('#secretq option:selected').text());
+
+    $('#signup-form, #signup-button').prop('disabled', false);
+    $('#signup-button').removeAttr('disabled');
+
+    setTimeout(function() {
+        $('#signup-button').click();
+        console.log("✅ Cadastro automático iniciado!");
+        console.log("Login:", login);
+        console.log("Nickname:", nickname);
+    }, 300);
+})();
+            `;
+
+            codeOutput.textContent = script;
+            outputArea.style.display = 'block';
+        });
+
+        // Copiar
+        copyBtn.addEventListener('click', function() {
+            const text = codeOutput.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("✅ Código copiado! Cole no console da página de cadastro.");
+            }).catch(() => {
+                alert("Não foi possível copiar, selecione manualmente e copie.");
+            });
+        });
+
+        // Toggle histórico
+        historicoToggle.addEventListener('click', function() {
+            historicoLista.classList.toggle('aberto');
+            if (historicoLista.classList.contains('aberto')) {
+                historicoToggle.textContent = '📜 Ocultar histórico';
+            } else {
+                historicoToggle.textContent = '📜 Histórico de cadastros gerados';
+            }
+        });
+
+        // Limpar histórico
+        limparHistorico.addEventListener('click', function() {
+            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+                historico = [];
+                salvarHistorico();
+                renderizarHistorico();
+                // Se a lista estiver fechada, não faz nada
+            }
+        });
+
+        // Inicializar
+        carregarHistorico();
+    })();
+</script>
+</body>
+</html>
